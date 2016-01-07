@@ -17,6 +17,7 @@ public:
 	virtual							~CRelation			();
 public:
 	void							Initialize			();
+	void 							Finalize			();
 public:
 	CIndex&							GetIndex			(string name) { return m_data[name] };
 private:

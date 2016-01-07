@@ -10,4 +10,6 @@ public:
 	void 				Finalize		();
 public:
 	CQueryResult 		Query			(int query);
+private:
+	CRelation			m_relation;
 }

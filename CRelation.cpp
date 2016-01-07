@@ -35,3 +35,8 @@ void CRelation::Initialize()
 		m_data[name] = pIndex;
 	};
 };
+
+void CRelation::Finalize()
+{
+	
+};
