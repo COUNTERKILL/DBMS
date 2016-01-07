@@ -1,3 +1,10 @@
+/*
+	File: CIndex.h
+	Author: Stepan Prikazchikov
+	About: Realization of column index
+*/
+#pragma once
+
 #include <string.h>
 #include <string>
 

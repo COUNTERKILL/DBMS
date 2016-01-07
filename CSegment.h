@@ -1,26 +1,34 @@
+/*
+	File: CSegment.h
+	Author: Stepan Prikazchikov
+	About: Realization of segment of column index
+*/
+#pragma once
 #include <vector>
 
 #define ELEMENT_TYPE (int)
+
+using namespace std;
 
 class CSegment
 {
 public:
 									CSegment			();
-									CSegment			(CSegment& segment);
-									~CSegment			();
+									CSegment			(const CSegment& segment);
+	virtual							~CSegment			();
 
 public:
-	size_t 							GetKey				(size_t index) 						{ return m_keys[index];   };
-	ELEMENT_TYPE					GetValue			(size_t index) 						{ return m_values[index]; };
-	size_t							GetSize				()									{ return m_keys.size(); };
+	size_t 							GetKey				(const size_t index) const 			{ return m_keys[index];   };
+	ELEMENT_TYPE					GetValue			(const size_t index) const 			{ return m_values[index]; };
+	size_t							GetSize				() const							{ return m_keys.size(); };
 	
 public:
-	void							AddElement			(size_t key, ELEMENT_TYPE value) 	{ m_keys.push_back(key); m_values.push_back(value);  };
+	void							AddElement			(size_t key, ELEMENT_TYPE value);
 
 public:
-	void							SetMinMaxValue		(ELEMENT_TYPE min, ELEMENT_TYPE max) { assert(min <= max); this.m_min = min; this.m_max = max; };
+	void							SetMinMaxValue		(ELEMENT_TYPE min, ELEMENT_TYPE max);
 public:
-	CSegment& 						operator= 			(const CSegment & );
+	CSegment& 						operator= 			(const CSegment &);
 	
 private:
 	vector<size_t> 					m_keys;
