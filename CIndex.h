@@ -7,16 +7,22 @@
 
 #include <string.h>
 #include <string>
+#include <assert.h>
+#include "CSegment.h"
+
+#define DIR "./db"
+#define EXT ".csv"
+#define NUM_SEGMENTS 2000
 
 using namespace std
 
 class CIndex
 {
 public:
-									CIndex					();
+									CIndex					(const string name, const bool, const CIndex*);
 									~CIndex					();
 public:
-	void							Load					(string name);
+	void							Load					();
 	
 	bool							IsTransitive			() 					{ return m_bTransitive };
 	

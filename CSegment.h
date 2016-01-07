@@ -4,7 +4,9 @@
 	About: Realization of segment of column index
 */
 #pragma once
+
 #include <vector>
+#include <assert.h>
 
 #define ELEMENT_TYPE (int)
 
@@ -23,10 +25,10 @@ public:
 	size_t							GetSize				() const							{ return m_keys.size(); };
 	
 public:
-	void							AddElement			(size_t key, ELEMENT_TYPE value);
+	void							AddElement			(const size_t key, const ELEMENT_TYPE value);
 
 public:
-	void							SetMinMaxValue		(ELEMENT_TYPE min, ELEMENT_TYPE max);
+	void							SetMinMaxValue		(const ELEMENT_TYPE min, const ELEMENT_TYPE max);
 public:
 	CSegment& 						operator= 			(const CSegment &);
 	

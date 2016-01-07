@@ -1,4 +1,4 @@
-#include <CSegment.h>
+#include "CSegment.h"
 
 CSegment::CSegment()
 {
@@ -19,13 +19,13 @@ CSegment::~CSegment()
 
 };
 
-void CSegment::AddElement(size_t key, ELEMENT_TYPE value) 	
+void CSegment::AddElement(const size_t key, const ELEMENT_TYPE value) 	
 {
 	m_keys.push_back(key);
 	m_values.push_back(value);  
 };
 
-void SetMinMaxValue(ELEMENT_TYPE min, ELEMENT_TYPE max)
+void SetMinMaxValue(const ELEMENT_TYPE min, const ELEMENT_TYPE max)
 {
 	assert(min <= max); 
 	m_min = min;
