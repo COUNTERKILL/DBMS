@@ -11,8 +11,8 @@
 #include "CSegment.h"
 
 #define DIR "./db"
-#define EXT ".csv"
-#define NUM_SEGMENTS 2000
+#define EXT "csv"
+#define NUM_SEGMENTS 2001
 #define NUM_FRAGMENTS 1
 
 
@@ -29,7 +29,7 @@ public:
 	
 	bool							IsTransitive			() 					{ return m_bTransitive; };
 	string 							GetName					()					{ return m_name; };
-	
+	size_t							GetSize					()					{ return m_data.size(); };
 public:
 	CSegment& 						operator[] 				(size_t i) 			{ return m_data[i][0]; };
 	size_t							GetSegmentsCount		()					{ return m_data.size(); };
