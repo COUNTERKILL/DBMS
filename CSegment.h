@@ -8,7 +8,7 @@
 #include <vector>
 #include <assert.h>
 
-#define ELEMENT_TYPE (int)
+#define ELEMENT_TYPE int
 
 using namespace std;
 

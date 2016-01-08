@@ -13,27 +13,31 @@
 #define DIR "./db"
 #define EXT ".csv"
 #define NUM_SEGMENTS 2000
+#define NUM_FRAGMENTS 1
 
 
-using namespace std
+using namespace std;
 
 class CIndex
 {
 public:
-									CIndex					(const string name, const bool, const CIndex*);
+									CIndex					(const string name, const bool isTransitive = false, CIndex* indexTransitiveOn = NULL);
 	virtual							~CIndex					();
 public:
-	void							Load					();
+	void							Initialize				();
+	void							Finalize				();
 	
-	bool							IsTransitive			() 					{ return m_bTransitive };
+	bool							IsTransitive			() 					{ return m_bTransitive; };
 	string 							GetName					()					{ return m_name; };
 	
 public:
-	CSegment& 						operator[] 				(size_t i) 			{ return *(m_data[i]); };
+	CSegment& 						operator[] 				(size_t i) 			{ return m_data[i][0]; };
 	size_t							GetSegmentsCount		()					{ return m_data.size(); };
-	void							AddSegment				(CSegment& segment)	{ m_data.push_back(segment); };
+	void							AddSegment				(CSegment* segment)	{ m_data.push_back(segment); };
 private:
-	vector<CSegment*>				m_data(NUM_SEGMENTS);
+	void							Load					();
+private:
+	vector<CSegment*>				m_data;
 	
 	string 							m_name;
 	size_t							m_rowsCount;

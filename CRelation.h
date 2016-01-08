@@ -19,7 +19,7 @@ public:
 	void							Initialize			();
 	void 							Finalize			();
 public:
-	CIndex&							GetIndex			(string name) { return m_data[name] };
+	CIndex*							GetIndex			(string name) { return m_data.find(name)->second; };
 private:
 	map<string, CIndex*> 			m_data; // array of rows
 		

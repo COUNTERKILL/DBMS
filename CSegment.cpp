@@ -25,7 +25,7 @@ void CSegment::AddElement(const size_t key, const ELEMENT_TYPE value)
 	m_values.push_back(value);  
 };
 
-void SetMinMaxValue(const ELEMENT_TYPE min, const ELEMENT_TYPE max)
+void CSegment::SetMinMaxValue(const ELEMENT_TYPE min, const ELEMENT_TYPE max)
 {
 	assert(min <= max); 
 	m_min = min;

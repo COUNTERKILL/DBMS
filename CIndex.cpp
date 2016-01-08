@@ -1,17 +1,20 @@
 #include "CIndex.h"
 #include <fstream>
+#include <cstdlib>
+
 
 extern size_t FRAGMENT_NUM;
 
 CIndex::CIndex	(const string name, 
-				 const bool isTransitive = false,
-				 const CIndex *indexTransitiveOn = NULL
+				 const bool isTransitive,
+				 CIndex *indexTransitiveOn 
 				)
 {
 	m_name 				= name;
 	m_bTransitive 		= isTransitive;
 	m_indexTransitiveOn = indexTransitiveOn;
-	assert(!(isTransitive ^^ (bool)indexTransitiveOn));
+	assert(!(isTransitive ^ (bool)indexTransitiveOn));
+	m_data.reserve(NUM_SEGMENTS);
 };
 
 CIndex::~CIndex()
@@ -24,11 +27,12 @@ void CIndex::Load()
 	size_t rowsCount = 0;
 	ELEMENT_TYPE min = 0;
 	ELEMENT_TYPE max = 0;
-	
-	string fileName = DIR + "/" + to_sting(NUM_FRAGMENTS) + "/" + m_name + "_" + to_sting(FRAGMENT_NUM) + EXT;
+	char fileName[255] = {0};
+	sprintf(fileName, "%s/%d/%s_%d.%s", DIR, NUM_FRAGMENTS, m_name.c_str(), FRAGMENT_NUM, EXT);
+	// = DIR + string("/") + itoa(NUM_FRAGMENTS) + string("/") + m_name + string("_") + itoa(FRAGMENT_NUM) + string(EXT);
 	if(access(fileName, 0) == -1)
 	{
-		throw Exception("Файл " + fileName + " не найден!");
+		throw (string("Файл ") + fileName + string(" не найден!"));
 	}
 	
 	ifstream fInput;
@@ -52,6 +56,8 @@ void CIndex::Load()
 			segmentSize = transSegment.GetSize();
 			for(size_t i = 0; i < segmentSize; i++)
 			{
+				size_t key 			= 0;
+				ELEMENT_TYPE value 	= 0;
 				fInput >> key >> value;
 				pSegment->AddElement(key, value);
 			}
@@ -60,7 +66,7 @@ void CIndex::Load()
 		{
 			ELEMENT_TYPE segmentDomainSize = 0;
 			segmentDomainSize = domainSize / NUM_SEGMENTS;
-			if ((domainSize % NUM_SEGMENTS) - (i-1) >= 1)	// введение поправки для segmentDomainSize
+			if ((domainSize % NUM_SEGMENTS) - (segIndex-1) >= 1)	// введение поправки для segmentDomainSize
 				segmentDomainSize++;								// в случае, если размер домена не делится 
 															// без остатка на количество сегментов
 			currentMaxValue = currentMinValue + segmentDomainSize - 1;
@@ -89,4 +95,17 @@ void CIndex::Load()
 		m_data.push_back(pSegment);
 	};
 	fInput.close();
+};
+
+void CIndex::Initialize()
+{
+	Load();
+};
+
+void CIndex::Finalize()
+{
+	for(vector<CSegment*>::iterator segmentIter = m_data.begin(); segmentIter!=m_data.end(); segmentIter++)
+	{
+		delete segmentIter->second;
+	};
 };

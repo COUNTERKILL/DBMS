@@ -1,8 +1,8 @@
 #include "CDBMS.h"
 
-void main()
+int main()
 {
 	CDBMS *pDBMS = new CDBMS();
 	pDBMS->Initialize();
-	return;
+	return 0;
 };

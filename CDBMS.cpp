@@ -19,3 +19,8 @@ void CDBMS::Finalize()
 {
 	m_relation.Finalize();
 };
+
+void CDBMS::Query(int)
+{
+
+};
