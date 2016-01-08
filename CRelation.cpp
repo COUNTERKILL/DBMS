@@ -22,7 +22,7 @@ void CRelation::Initialize()
 	for(size_t i = 0; i < indecesCount; i++)
 	{
 		char sectionParamName[255] = {0};
-		sprintf(sectionParamName, "%s%d%s", "index", i, ".name");
+		sprintf(sectionParamName, "%s%lu%s", "index", i, ".name");
 		string name = pt.get<string>(sectionParamName);
 		CIndex* pIndex = new CIndex(name);
 		pIndex->Initialize();
@@ -31,9 +31,9 @@ void CRelation::Initialize()
 	for(size_t i = 0; i < transitiveIndecesCount; i++)
 	{
 		char sectionParamName[255] = {0};
-		sprintf(sectionParamName, "%s%d%s", "transitive", i, ".name");
+		sprintf(sectionParamName, "%s%lu%s", "transitive", i, ".name");
 		string name = pt.get<string>(sectionParamName);
-		sprintf(sectionParamName, "%s%d%s", "transitive", i, ".transitive_on");
+		sprintf(sectionParamName, "%s%lu%s", "transitive", i, ".transitive_on");
 		string transitiveOnName = pt.get<string>(sectionParamName);
 		CIndex* pIndexTransitiveOn = GetIndex(transitiveOnName);
 		CIndex* pIndex = new CIndex(name, true, pIndexTransitiveOn);

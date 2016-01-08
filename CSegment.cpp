@@ -39,4 +39,5 @@ CSegment& CSegment::operator= 			(const CSegment& segment)
 	
 	m_min		= segment.m_min;
 	m_max		= segment.m_max;
+	return *this;
 };

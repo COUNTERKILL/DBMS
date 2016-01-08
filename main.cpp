@@ -1,14 +1,22 @@
 #include "CDBMS.h"
 #include <iostream>
+#include <cstdlib>
 
 using namespace std;
 
-int main()
+int main(int argc, char** argv)
 {
+	if(argc != 2)
+	{
+		cout << "Query type doesn't matchig" << endl;
+		return -1;
+	};
 	try
 	{
-		CDBMS *pDBMS = new CDBMS();
+		QueryType q = (QueryType)atoi(argv[1]);
+		CDBMS *pDBMS = new CDBMS(&argc, &argv);
 		pDBMS->Initialize();
+		pDBMS->Query(q);
 	}
 	catch(string err)
 	{

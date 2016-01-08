@@ -28,11 +28,11 @@ void CIndex::Load()
 	ELEMENT_TYPE min = 0;
 	ELEMENT_TYPE max = 0;
 	char fileName[255] = {0};
-	sprintf(fileName, "%s/%d/%s_%d.%s", DIR, NUM_FRAGMENTS, m_name.c_str(), FRAGMENT_NUM, EXT);
+	sprintf(fileName, "%s/%lu/%s_%lu.%s", DIR, NUM_FRAGMENTS, m_name.c_str(), FRAGMENT_NUM, EXT);
 	// = DIR + string("/") + itoa(NUM_FRAGMENTS) + string("/") + m_name + string("_") + itoa(FRAGMENT_NUM) + string(EXT);
 	if(access(fileName, 0) == -1)
 	{
-		throw (string("Файл ") + fileName + string(" не найден!"));
+		throw (string("File ") + fileName + string(" doesn't exist!"));
 	}
 	
 	ifstream fInput;
@@ -61,18 +61,20 @@ void CIndex::Load()
 			segmentSize = transSegment.GetSize();
 			for(size_t i = 0; i < segmentSize; i++)
 			{
-				size_t key 			= 0;
-				ELEMENT_TYPE value 	= 0;
-				fInput >> key >> value;
 				pSegment->AddElement(key, value);
+				if(currentRowNum<rowsCount)
+					fInput >> key >> value;
+				else
+					break;
+				currentRowNum++;
 			}
 		}
 		else
 		{
 			ELEMENT_TYPE segmentDomainSize = 0;
 			segmentDomainSize = domainSize / NUM_SEGMENTS;
-			if ((domainSize % NUM_SEGMENTS) && ((domainSize % NUM_SEGMENTS) - (segIndex-1)>= 1))	// введение поправки для segmentDomainSize
-				segmentDomainSize++;								// в случае, если размер домена не делится 
+			//if ((domainSize % NUM_SEGMENTS) && (((domainSize % NUM_SEGMENTS) - (segIndex)) >= 0))	// введение поправки для segmentDomainSize
+			//	segmentDomainSize++;								// в случае, если размер домена не делится 
 																	// без остатка на количество сегментов
 		
 			currentMaxValue = currentMinValue + segmentDomainSize - 1;
@@ -80,7 +82,7 @@ void CIndex::Load()
 			{
 				currentMaxValue = max;
 			};
-			
+			//cout << currentMinValue << endl;
 			pSegment->SetMinMaxValue(currentMinValue, currentMaxValue);
 			// Adding elements to segment
 			segmentSize = 0;

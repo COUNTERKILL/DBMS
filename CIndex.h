@@ -12,8 +12,8 @@
 
 #define DIR "./db"
 #define EXT "csv"
-#define NUM_SEGMENTS 2001
-#define NUM_FRAGMENTS 1
+#define NUM_SEGMENTS 2000
+extern size_t NUM_FRAGMENTS;
 
 
 using namespace std;
