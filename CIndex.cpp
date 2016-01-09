@@ -4,6 +4,7 @@
 #include <iostream>
 
 extern size_t FRAGMENT_NUM;
+extern size_t NUM_FRAGMENTS;
 
 CIndex::CIndex	(const string name, 
 				 const bool isTransitive,
@@ -102,6 +103,7 @@ void CIndex::Load()
 			
 		m_data.push_back(pSegment);
 	};
+	assert(currentRowNum==rowsCount);
 	fInput.close();
 };
 

@@ -8,7 +8,7 @@ size_t 	FRAGMENT_NUM 	= 0;
 size_t 	NUM_FRAGMENTS	= 0;
 int 	numNodes 		= 0;
 int 	nodeNum 		= 0;
-size_t 	DEF_NUM_THREADS	= 1;
+size_t 	DEF_NUM_THREADS	= 10;
 
 #define WORKER (nodeNum != 0)
 #define COORDINATOR (nodeNum == 0)
@@ -58,14 +58,14 @@ void CDBMS::Query(QueryType queryNum)
 		case QUERY_7:
 			if(COORDINATOR)
 			{
-				PCT1<unsigned long long int>* pPTC = new PCT1<unsigned long long int>(NUM_FRAGMENTS);
-				ReceivePCT(queryNum, pPTC);
+				PCT1<unsigned long long int>* pPCT = new PCT1<unsigned long long int>(NUM_FRAGMENTS);
+				ReceivePCT1(queryNum, pPCT);
 				unsigned long long int sum = 0;
 				for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++)
 				{
-					size_t size = pPTC->GetSize(numfr);
+					size_t size = pPCT->GetSize(numfr);
 					for(int i = 0; i < size; i++)
-						sum += pPTC->GetElement(numfr, i);
+						sum += pPCT->GetElement(numfr, i);
 				};
 				cout << "Result: " << sum << endl;
 			};
@@ -73,21 +73,22 @@ void CDBMS::Query(QueryType queryNum)
 			{
 				PCT1<unsigned long long int>* pBufPCT = Query7();
 				PCT1<unsigned long long int>* pPCT = new PCT1<unsigned long long int>(1);
-				WorkerDataPrepare(queryNum, pBufPCT, pPCT);
-				SendPCT(pPCT);
+				WorkerPCT1Prepare(queryNum, pBufPCT, pPCT);
+				delete pBufPCT;
+				SendPCT1(pPCT);
 			}
 			break;
 		case QUERY_8:
 			if(COORDINATOR)
 			{
-				PCT1<unsigned long long int>* pPTC = new PCT1<unsigned long long int>(NUM_FRAGMENTS);
-				ReceivePCT(queryNum, pPTC);
+				PCT1<unsigned long long int>* pPCT = new PCT1<unsigned long long int>(NUM_FRAGMENTS);
+				ReceivePCT1(queryNum, pPCT);
 				unsigned long long int sum = 0;
 				for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++)
 				{
-					size_t size = pPTC->GetSize(numfr);
+					size_t size = pPCT->GetSize(numfr);
 					for(int i = 0; i < size; i++)
-						sum += pPTC->GetElement(numfr, i);
+						sum += pPCT->GetElement(numfr, i);
 				};
 				cout << "Result: " << sum << endl;
 			};
@@ -95,21 +96,80 @@ void CDBMS::Query(QueryType queryNum)
 			{
 				PCT1<unsigned long long int>* pBufPCT = Query8();
 				PCT1<unsigned long long int>* pPCT = new PCT1<unsigned long long int>(1);
-				WorkerDataPrepare(queryNum, pBufPCT, pPCT);
-				SendPCT(pPCT);
+				WorkerPCT1Prepare(queryNum, pBufPCT, pPCT);
+				delete pBufPCT;
+				SendPCT1(pPCT);
+			}
+			break;
+		case QUERY_9:
+			if(COORDINATOR)
+			{
+				PCT2<size_t, unsigned long long int>* pPCT = new PCT2<size_t, unsigned long long int>(NUM_FRAGMENTS);
+				ReceivePCT2(queryNum, pPCT);
+				unsigned long long int resGroupSum[5] = {0, 0, 0, 0, 0};
+				for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++)
+				{
+					size_t size = pPCT->GetSize(numfr);
+					for(int i = 0; i < size; i++)
+					{
+						resGroupSum[pPCT->GetElement1(numfr, i)] += pPCT->GetElement2(numfr, i);
+					};
+				};
+				cout << "Result:" << endl;
+				for(size_t i = 0; i < 5; i++)
+				{
+					cout << "[" << i << "] [" <<  resGroupSum[i] << "]" << endl;
+				};
+			};
+			if(WORKER)
+			{
+				PCT2<size_t, unsigned long long int>* pBufPCT = Query9();
+				PCT2<size_t, unsigned long long int>* pPCT = new PCT2<size_t, unsigned long long int>(1);
+				WorkerPCT2Prepare(queryNum, pBufPCT, pPCT);
+				delete pBufPCT;
+				SendPCT2(pPCT);
+			}
+			break;
+		case QUERY_10:
+			if(COORDINATOR)
+			{
+				PCT2<size_t, unsigned long long int>* pPCT = new PCT2<size_t, unsigned long long int>(NUM_FRAGMENTS);
+				ReceivePCT2(queryNum, pPCT);
+				unsigned long long int resGroupSum[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+				for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++)
+				{
+					size_t size = pPCT->GetSize(numfr);
+					for(int i = 0; i < size; i++)
+					{
+						resGroupSum[pPCT->GetElement1(numfr, i)] += pPCT->GetElement2(numfr, i);
+					};
+				};
+				cout << "Result:" << endl;
+				for(size_t i = 0; i < 10; i++)
+				{
+					cout << "[" << i << "] [" <<  resGroupSum[i] << "]" << endl;
+				};
+			};
+			if(WORKER)
+			{
+				PCT2<size_t, unsigned long long int>* pBufPCT = Query10();
+				PCT2<size_t, unsigned long long int>* pPCT = new PCT2<size_t, unsigned long long int>(1);
+				WorkerPCT2Prepare(queryNum, pBufPCT, pPCT);
+				delete pBufPCT;
+				SendPCT2(pPCT);
 			}
 			break;
 	};
 };
 
-void CDBMS::ReceivePCT(QueryType queryNum, PCT1<unsigned long long int>* pPTC)
+void CDBMS::ReceivePCT1(QueryType queryNum, PCT1<unsigned long long int>* pPCT)
 {
-	MPI_Request **requests = new MPI_Request*[NUM_FRAGMENTS];
 	
 	switch(queryNum)
 	{
 		case QUERY_7:
 		case QUERY_8:
+			MPI_Request **requests = new MPI_Request*[NUM_FRAGMENTS];
 			// vector of sums
 			vector<unsigned long long int> data(NUM_FRAGMENTS);
 			for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++) 
@@ -127,19 +187,112 @@ void CDBMS::ReceivePCT(QueryType queryNum, PCT1<unsigned long long int>* pPTC)
 			};
 			for(size_t numfr = 0; numfr < NUM_FRAGMENTS; numfr++)
 			{
-				pPTC->AddElement(numfr, data[numfr]);
+				pPCT->AddElement(numfr, data[numfr]);
 			}
 			break;
 	};
+	
 };
 
-void CDBMS::SendPCT(PCT1<unsigned long long int>* pPTC)
+void CDBMS::ReceivePCT2(QueryType queryNum, PCT2<size_t, unsigned long long int>* pPCT)
 {
-	unsigned long long int value = pPTC->GetElement(0, 0);
+	switch(queryNum)
+	{
+		case QUERY_9:
+		{
+			MPI_Request **requests = new MPI_Request*[NUM_FRAGMENTS*2];
+			// vector of keys
+			vector<vector<size_t> > keys(NUM_FRAGMENTS);
+			// vector of sums
+			vector<vector<unsigned long long int> > data(NUM_FRAGMENTS);
+			for(size_t numfr = 0; numfr < NUM_FRAGMENTS; numfr++)
+			{
+				keys[numfr].resize(6);
+				data[numfr].resize(6);
+			}
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++) 
+			{
+				size_t source = numfr + 1;
+				cout << "Receiving precomputational table." << endl;
+				// start receiving attribute keys
+				MPI_Irecv(&(keys[numfr][0]), 5, MPI_LONG_INT, source, MPI_ANY_TAG, MPI_COMM_WORLD, requests[numfr]);
+			};
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++) 
+			{
+				size_t source = numfr + 1;
+				// start receiving attribute data
+				MPI_Irecv(&(data[numfr][0]), 5, MPI_LONG_LONG_INT, source, MPI_ANY_TAG, MPI_COMM_WORLD, requests[NUM_FRAGMENTS + numfr]);
+			};
+			
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS*2; numfr++) 
+			{
+				MPI_Status status;
+				MPI_Wait(requests[numfr], &status);
+			};
+			for(size_t numfr = 0; numfr < NUM_FRAGMENTS; numfr++)
+			{
+				for(size_t i = 0; i < 5; i++)
+					pPCT->AddElement(numfr, keys[numfr][i], data[numfr][i]);
+			};
+			break;
+		}
+		case QUERY_10:
+		{
+			MPI_Request **requests = new MPI_Request*[NUM_FRAGMENTS*2];
+			// vector of keys
+			vector<vector<size_t> > keys(NUM_FRAGMENTS);
+			// vector of sums
+			vector<vector<unsigned long long int> > data(NUM_FRAGMENTS);
+			for(size_t numfr = 0; numfr < NUM_FRAGMENTS; numfr++)
+			{
+				keys[numfr].resize(12);
+				data[numfr].resize(12);
+			}
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++) 
+			{
+				size_t source = numfr + 1;
+				cout << "Receiving precomputational table." << endl;
+				// start receiving attribute keys
+				MPI_Irecv(&(keys[numfr][0]), 10, MPI_LONG_INT, source, MPI_ANY_TAG, MPI_COMM_WORLD, requests[numfr]);
+			};
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS; numfr++) 
+			{
+				size_t source = numfr + 1;
+				// start receiving attribute data
+				MPI_Irecv(&(data[numfr][0]), 10, MPI_LONG_LONG_INT, source, MPI_ANY_TAG, MPI_COMM_WORLD, requests[NUM_FRAGMENTS + numfr]);
+			};
+			
+			for(size_t numfr=0; numfr<NUM_FRAGMENTS*2; numfr++) 
+			{
+				MPI_Status status;
+				MPI_Wait(requests[numfr], &status);
+			};
+			for(size_t numfr = 0; numfr < NUM_FRAGMENTS; numfr++)
+			{
+				for(size_t i = 0; i < 10; i++)
+					pPCT->AddElement(numfr, keys[numfr][i], data[numfr][i]);
+			};
+			break;
+		};
+	};
+};
+
+void CDBMS::SendPCT1(PCT1<unsigned long long int>* pPCT)
+{
+	unsigned long long int value = pPCT->GetElement(0, 0);
 	MPI_Send(&value, 1, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD);
 };
 
-void CDBMS::WorkerDataPrepare(QueryType queryNum, PCT1<unsigned long long int>* pInPCT, PCT1<unsigned long long int>* pOutPCT)
+void CDBMS::SendPCT2(PCT2<size_t, unsigned long long int>* pPCT)
+{
+	size_t *pKey = pPCT->GetRawDataPointer1(0);
+	size_t size = pPCT->GetSize(0);
+	MPI_Send(pKey, size, MPI_LONG_INT, 0, 0, MPI_COMM_WORLD);
+	unsigned long long int *pValue = pPCT->GetRawDataPointer2(0);
+	MPI_Send(pValue, size, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD);
+};
+
+void CDBMS::WorkerPCT1Prepare(QueryType queryNum, PCT1<unsigned long long int>* pInPCT, PCT1<unsigned long long int>* pOutPCT)
 {
 	switch(queryNum)
 	{
@@ -154,6 +307,47 @@ void CDBMS::WorkerDataPrepare(QueryType queryNum, PCT1<unsigned long long int>* 
 			};
 			pOutPCT->AddElement(0, sum);
 			break;
+	};
+};
+
+void CDBMS::WorkerPCT2Prepare	( 	QueryType queryNum, PCT2<size_t, unsigned long long int>* pInPCT,
+									PCT2<size_t, unsigned long long int>* pOutPCT
+								)
+{
+	switch(queryNum)
+	{
+		case QUERY_9:
+		{
+			unsigned long long int resGroupSum[5] = {0, 0, 0, 0, 0};
+			for(size_t thNum = 0; thNum < DEF_NUM_THREADS; thNum++)
+			{
+				size_t size = pInPCT->GetSize(thNum);
+				for(int i = 0; i < size; i++)
+				{
+					resGroupSum[pInPCT->GetElement1(thNum, i)] += pInPCT->GetElement2(thNum, i);
+				};
+					
+			};
+			for(size_t i = 0; i < 5; i++)
+				pOutPCT->AddElement(0, i, resGroupSum[i]);
+			break;
+		};
+		case QUERY_10:
+		{
+			unsigned long long int resGroupSum[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+			for(size_t thNum = 0; thNum < DEF_NUM_THREADS; thNum++)
+			{
+				size_t size = pInPCT->GetSize(thNum);
+				for(int i = 0; i < size; i++)
+				{
+					resGroupSum[pInPCT->GetElement1(thNum, i)] += pInPCT->GetElement2(thNum, i);
+				};
+					
+			};
+			for(size_t i = 0; i < 10; i++)
+				pOutPCT->AddElement(0, i, resGroupSum[i]);
+			break;
+		};
 	};
 };
 
@@ -176,7 +370,7 @@ PCT1<unsigned long long int>* CDBMS::Query7()
 			
 		numth = omp_get_thread_num();	
 		#pragma omp for schedule(dynamic, 1)
-		for(size_t indexSegment = 0; indexSegment < pIOrdersRevenue->GetSize(); indexSegment++)
+		for(size_t indexSegment = 0; indexSegment < NUM_SEGMENTS; indexSegment++)
 		{
 			unsigned long long int sum = 0;
 			for(size_t i = 0; i < pIOrdersDiscountTransRevenue[0][indexSegment].GetSize(); i++)
@@ -216,7 +410,7 @@ PCT1<unsigned long long int>* CDBMS::Query8()
 			
 		numth = omp_get_thread_num();	
 		#pragma omp for schedule(dynamic, 1)
-		for(size_t indexSegment = 0; indexSegment < pIOrdersRevenue->GetSize(); indexSegment++)
+		for(size_t indexSegment = 0; indexSegment < NUM_SEGMENTS; indexSegment++)
 		{
 			unsigned long long int sum = 0;
 			for(size_t i = 0; i < pIOrdersDiscountTransRevenue[0][indexSegment].GetSize(); i++)
@@ -232,6 +426,167 @@ PCT1<unsigned long long int>* CDBMS::Query8()
 				   
 			};
 			pBufPCT->AddElement(numth, sum);
+		};
+	};
+	return pBufPCT;
+};
+
+
+PCT2<size_t, unsigned long long int>* CDBMS::Query9()
+{
+	const size_t	MKTSEGMENT 			= 1;
+	const size_t 	COMMITYEAR 			= 2015;
+	
+	PCT2<size_t, unsigned long long int>* pBufPCT 	= new PCT2<size_t, unsigned long long int>(DEF_NUM_THREADS);
+	
+	CIndex* pICustomerIdCustomer 				= m_relation.GetIndex("I_CUSTOMER_ID_CUSTOMER");
+	CIndex* pICustomerRegionTransIdCustomer 	= m_relation.GetIndex("I_CUSTOMER_REGION_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pICustomerMktsegmentTransIdCustomer = m_relation.GetIndex("I_CUSTOMER_MKTSEGMENT_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pIOrdersIdCustomer 					= m_relation.GetIndex("I_ORDERS_ID_CUSTOMER");
+	CIndex* pIOrdersRevenueTransIdCustomer 		= m_relation.GetIndex("I_ORDERS_REVENUE_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pIOrdersCommityearTransIdCustomer 	= m_relation.GetIndex("I_ORDERS_COMMITYEAR_TRANSITIVE_ID_CUSTOMER");
+	
+	size_t numth = 0;
+	
+	#pragma omp parallel num_threads(DEF_NUM_THREADS) private(numth)
+	{
+			
+		numth = omp_get_thread_num();	
+		#pragma omp for schedule(dynamic, 1)
+		for(size_t indexSegment = 0; indexSegment < NUM_SEGMENTS; indexSegment++)
+		{
+			PCT2<size_t, size_t>* joinRES	= new PCT2<size_t, size_t>(1);
+			size_t customersIter 			= 0;
+			size_t ordersIter 				= 0;
+			size_t customersSize			= pICustomerIdCustomer[0][indexSegment].GetSize();
+			size_t ordersSize				= pIOrdersIdCustomer[0][indexSegment].GetSize();
+			while((customersIter < customersSize) && (ordersIter < ordersSize))
+			{
+				if ((pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) == pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter)) 
+					&& (pICustomerMktsegmentTransIdCustomer[0][indexSegment].GetValue(customersIter) == MKTSEGMENT)
+					&& (pIOrdersCommityearTransIdCustomer[0][indexSegment].GetValue(ordersIter) == COMMITYEAR)
+					)
+				{
+					size_t key1 = pICustomerIdCustomer[0][indexSegment].GetKey(customersIter);
+					size_t key2 = pIOrdersIdCustomer[0][indexSegment].GetKey(ordersIter);
+					joinRES->AddElement(0, key1, key2);
+					ordersIter++;
+				}
+				else
+				{
+					if (pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) < pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter))
+					{
+						customersIter++;
+					}
+					else
+					{
+						ordersIter++;
+					};
+				};
+			
+			};
+			unsigned long long int resGroupSum[5] = {0, 0, 0, 0, 0};
+			for(size_t joinResIdx = 0; joinResIdx < joinRES->GetSize(0); joinResIdx++)
+			{
+				for(size_t regionIdx = 0; regionIdx < customersSize; regionIdx++)
+				{
+					if (joinRES->GetElement1(0, joinResIdx) == pICustomerRegionTransIdCustomer[0][indexSegment].GetKey(regionIdx))
+					{
+						for(size_t revenueIdx = 0; revenueIdx < ordersSize; revenueIdx++)
+						{
+							if (joinRES->GetElement2(0, joinResIdx) == pIOrdersRevenueTransIdCustomer[0][indexSegment].GetKey(revenueIdx))
+							{
+								size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(revenueIdx);
+								size_t region 	= pICustomerRegionTransIdCustomer[0][indexSegment].GetValue(regionIdx);
+								resGroupSum[region] += revenue;
+							};
+						};
+					};
+				};
+			};
+			for(size_t i = 0; i < 5; i++)
+				pBufPCT->AddElement(numth, i, resGroupSum[i]);
+			delete joinRES;
+		};
+	};
+	return pBufPCT;
+};
+
+PCT2<size_t, unsigned long long int>* CDBMS::Query10()
+{
+	const size_t	MKTSEGMENT 			= 1;
+	const size_t 	COMMITYEAR 			= 2015;
+	
+	PCT2<size_t, unsigned long long int>* pBufPCT 	= new PCT2<size_t, unsigned long long int>(DEF_NUM_THREADS);
+	
+	CIndex* pICustomerIdCustomer 				= m_relation.GetIndex("I_CUSTOMER_ID_CUSTOMER");
+	CIndex* pICustomerCityTransIdCustomer 		= m_relation.GetIndex("I_CUSTOMER_CITY_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pICustomerMktsegmentTransIdCustomer = m_relation.GetIndex("I_CUSTOMER_MKTSEGMENT_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pIOrdersIdCustomer 					= m_relation.GetIndex("I_ORDERS_ID_CUSTOMER");
+	CIndex* pIOrdersRevenueTransIdCustomer 		= m_relation.GetIndex("I_ORDERS_REVENUE_TRANSITIVE_ID_CUSTOMER");
+	CIndex* pIOrdersCommityearTransIdCustomer 	= m_relation.GetIndex("I_ORDERS_COMMITYEAR_TRANSITIVE_ID_CUSTOMER");
+	
+	size_t numth = 0;
+	
+	#pragma omp parallel num_threads(DEF_NUM_THREADS) private(numth)
+	{
+			
+		numth = omp_get_thread_num();	
+		#pragma omp for schedule(dynamic, 1)
+		for(size_t indexSegment = 0; indexSegment < NUM_SEGMENTS; indexSegment++)
+		{
+			PCT2<size_t, size_t>* joinRES	= new PCT2<size_t, size_t>(1);
+			size_t customersIter 			= 0;
+			size_t ordersIter 				= 0;
+			size_t customersSize			= pICustomerIdCustomer[0][indexSegment].GetSize();
+			size_t ordersSize				= pIOrdersIdCustomer[0][indexSegment].GetSize();
+			while((customersIter < customersSize) && (ordersIter < ordersSize))
+			{
+				if ((pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) == pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter)) 
+					&& (pICustomerMktsegmentTransIdCustomer[0][indexSegment].GetValue(customersIter) == MKTSEGMENT)
+					&& (pIOrdersCommityearTransIdCustomer[0][indexSegment].GetValue(ordersIter) == COMMITYEAR)
+					)
+				{
+					size_t key1 = pICustomerIdCustomer[0][indexSegment].GetKey(customersIter);
+					size_t key2 = pIOrdersIdCustomer[0][indexSegment].GetKey(ordersIter);
+					joinRES->AddElement(0, key1, key2);
+					ordersIter++;
+				}
+				else
+				{
+					if (pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) < pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter))
+					{
+						customersIter++;
+					}
+					else
+					{
+						ordersIter++;
+					};
+				};
+			
+			};
+			unsigned long long int resGroupSum[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+			for(size_t joinResIdx = 0; joinResIdx < joinRES->GetSize(0); joinResIdx++)
+			{
+				for(size_t regionIdx = 0; regionIdx < customersSize; regionIdx++)
+				{
+					if (joinRES->GetElement1(0, joinResIdx) == pICustomerCityTransIdCustomer[0][indexSegment].GetKey(regionIdx))
+					{
+						for(size_t revenueIdx = 0; revenueIdx < ordersSize; revenueIdx++)
+						{
+							if (joinRES->GetElement2(0, joinResIdx) == pIOrdersRevenueTransIdCustomer[0][indexSegment].GetKey(revenueIdx))
+							{
+								size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(revenueIdx);
+								size_t region 	= pICustomerCityTransIdCustomer[0][indexSegment].GetValue(regionIdx);
+								resGroupSum[region] += revenue;
+							};
+						};
+					};
+				};
+			};
+			for(size_t i = 0; i < 10; i++)
+				pBufPCT->AddElement(numth, i, resGroupSum[i]);
+			delete joinRES;
 		};
 	};
 	return pBufPCT;

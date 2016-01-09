@@ -6,11 +6,11 @@
 
 enum QueryType
 {
-	QUERY_7,
-	QUERY_8,
-	QUERY_9,
-	QUERY_10,
-	QUERY_11,
-	QUERY_12,
-	QUERY_13
+	QUERY_7 	= 7,
+	QUERY_8 	= 8,
+	QUERY_9 	= 9,
+	QUERY_10 	= 10,
+	QUERY_11 	= 11,
+	QUERY_12 	= 12,
+	QUERY_13 	= 13
 };

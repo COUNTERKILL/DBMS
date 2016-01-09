@@ -11,30 +11,33 @@ template<typename T>
 class PCT1
 {
 public:
-	PCT1					(size_t numThreads) 			{ m_data.resize(numThreads); };
-	~PCT1					() 								{};
+	PCT1						(size_t numThreads) 			{ m_data.resize(numThreads); };
+	~PCT1						() 								{};
 public:
-	void 	AddElement		(size_t numth, T elem) 			{ m_data[numth].push_back(elem); };
-	T 		GetElement		(size_t numth, size_t index) 	{ return m_data[numth][index]; };
+	void 	AddElement			(size_t numth, T elem) 			{ m_data[numth].push_back(elem); };
+	T& 		GetElement			(size_t numth, size_t index) 	{ return m_data[numth][index]; };
+	T*		GetRawDataPointer	(size_t numth)					{ return &(m_data[numth][0]); };
 public:
-	size_t 	GetSize			(size_t numth) 					{ return m_data[numth].size();};
+	size_t 	GetSize				(size_t numth) 					{ return m_data[numth].size();};
 private:	
-	vector<vector<T> > 		m_data;
+	vector<vector<T> > 			m_data;
 };
 
 template<typename T1, typename T2>
 class PCT2
 {
 public:
-	PCT2					(size_t numThreads) 						{ m_data1.resize(numThreads); m_data2.resize(numThreads); };
-	~PCT2					() 											{};
+	PCT2						(size_t numThreads) 						{ m_data1.resize(numThreads); m_data2.resize(numThreads); };
+	~PCT2						() 											{};
 public:
-	void 	AddElement		(size_t numth, T1 elem1, T2 elem2) 			{ m_data1[numth].push_back(elem1); m_data2[numth].push_back(elem2); };
-	T1	 	GetElement1		(size_t numth, size_t index) 				{ return m_data1[numth][index]; };
-	T2	 	GetElement2		(size_t numth, size_t index) 				{ return m_data2[numth][index]; };
+	void 	AddElement			(size_t numth, T1 elem1, T2 elem2) 			{ m_data1[numth].push_back(elem1); m_data2[numth].push_back(elem2); };
+	T1&	 	GetElement1			(size_t numth, size_t index) 				{ return m_data1[numth][index]; };
+	T2&	 	GetElement2			(size_t numth, size_t index) 				{ return m_data2[numth][index]; };
+	T1*		GetRawDataPointer1	(size_t numth)					{ return &(m_data1[numth][0]);};
+	T2*		GetRawDataPointer2	(size_t numth)					{ return &(m_data2[numth][0]);};
 public:
-	size_t 	GetSize			(size_t numth) 								{ return m_data1[numth].size();};
+	size_t 	GetSize				(size_t numth) 								{ return m_data1[numth].size();};
 private:	
-	vector<vector<T1> > 	m_data1;
-	vector<vector<T2> > 	m_data2;
+	vector<vector<T1> > 		m_data1;
+	vector<vector<T2> > 		m_data2;
 };
