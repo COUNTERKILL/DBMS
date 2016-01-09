@@ -460,6 +460,7 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query9()
 			size_t ordersIter 				= 0;
 			size_t customersSize			= pICustomerIdCustomer[0][indexSegment].GetSize();
 			size_t ordersSize				= pIOrdersIdCustomer[0][indexSegment].GetSize();
+			unsigned long long int resGroupSum[5] = {0, 0, 0, 0, 0};
 			while((customersIter < customersSize) && (ordersIter < ordersSize))
 			{
 				if ((pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) == pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter)) 
@@ -467,9 +468,9 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query9()
 					&& (pIOrdersCommityearTransIdCustomer[0][indexSegment].GetValue(ordersIter) == COMMITYEAR)
 					)
 				{
-					size_t key1 = pICustomerIdCustomer[0][indexSegment].GetKey(customersIter);
-					size_t key2 = pIOrdersIdCustomer[0][indexSegment].GetKey(ordersIter);
-					joinRES->AddElement(0, key1, key2);
+					size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(ordersIter);
+					size_t region 	= pICustomerRegionTransIdCustomer[0][indexSegment].GetValue(customersIter);
+					resGroupSum[region] += revenue;
 					ordersIter++;
 				}
 				else
@@ -484,25 +485,6 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query9()
 					};
 				};
 			
-			};
-			unsigned long long int resGroupSum[5] = {0, 0, 0, 0, 0};
-			for(size_t joinResIdx = 0; joinResIdx < joinRES->GetSize(0); joinResIdx++)
-			{
-				for(size_t regionIdx = 0; regionIdx < customersSize; regionIdx++)
-				{
-					if (joinRES->GetElement1(0, joinResIdx) == pICustomerRegionTransIdCustomer[0][indexSegment].GetKey(regionIdx))
-					{
-						for(size_t revenueIdx = 0; revenueIdx < ordersSize; revenueIdx++)
-						{
-							if (joinRES->GetElement2(0, joinResIdx) == pIOrdersRevenueTransIdCustomer[0][indexSegment].GetKey(revenueIdx))
-							{
-								size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(revenueIdx);
-								size_t region 	= pICustomerRegionTransIdCustomer[0][indexSegment].GetValue(regionIdx);
-								resGroupSum[region] += revenue;
-							};
-						};
-					};
-				};
 			};
 			for(size_t i = 0; i < 5; i++)
 				pBufPCT->AddElement(numth, i, resGroupSum[i]);
@@ -535,11 +517,12 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query10()
 		#pragma omp for schedule(dynamic, 1)
 		for(size_t indexSegment = 0; indexSegment < NUM_SEGMENTS; indexSegment++)
 		{
-			PCT2<size_t, size_t>* joinRES	= new PCT2<size_t, size_t>(1);
+			
 			size_t customersIter 			= 0;
 			size_t ordersIter 				= 0;
 			size_t customersSize			= pICustomerIdCustomer[0][indexSegment].GetSize();
 			size_t ordersSize				= pIOrdersIdCustomer[0][indexSegment].GetSize();
+			unsigned long long int resGroupSum[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			while((customersIter < customersSize) && (ordersIter < ordersSize))
 			{
 				if ((pICustomerIdCustomer[0][indexSegment].GetValue(customersIter) == pIOrdersIdCustomer[0][indexSegment].GetValue(ordersIter)) 
@@ -547,9 +530,9 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query10()
 					&& (pIOrdersCommityearTransIdCustomer[0][indexSegment].GetValue(ordersIter) == COMMITYEAR)
 					)
 				{
-					size_t key1 = pICustomerIdCustomer[0][indexSegment].GetKey(customersIter);
-					size_t key2 = pIOrdersIdCustomer[0][indexSegment].GetKey(ordersIter);
-					joinRES->AddElement(0, key1, key2);
+					size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(ordersIter);
+					size_t region 	= pICustomerCityTransIdCustomer[0][indexSegment].GetValue(customersIter);
+					resGroupSum[region] += revenue;
 					ordersIter++;
 				}
 				else
@@ -565,28 +548,9 @@ PCT2<size_t, unsigned long long int>* CDBMS::Query10()
 				};
 			
 			};
-			unsigned long long int resGroupSum[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-			for(size_t joinResIdx = 0; joinResIdx < joinRES->GetSize(0); joinResIdx++)
-			{
-				for(size_t regionIdx = 0; regionIdx < customersSize; regionIdx++)
-				{
-					if (joinRES->GetElement1(0, joinResIdx) == pICustomerCityTransIdCustomer[0][indexSegment].GetKey(regionIdx))
-					{
-						for(size_t revenueIdx = 0; revenueIdx < ordersSize; revenueIdx++)
-						{
-							if (joinRES->GetElement2(0, joinResIdx) == pIOrdersRevenueTransIdCustomer[0][indexSegment].GetKey(revenueIdx))
-							{
-								size_t revenue 	= pIOrdersRevenueTransIdCustomer[0][indexSegment].GetValue(revenueIdx);
-								size_t region 	= pICustomerCityTransIdCustomer[0][indexSegment].GetValue(regionIdx);
-								resGroupSum[region] += revenue;
-							};
-						};
-					};
-				};
-			};
 			for(size_t i = 0; i < 10; i++)
 				pBufPCT->AddElement(numth, i, resGroupSum[i]);
-			delete joinRES;
+			
 		};
 	};
 	return pBufPCT;
