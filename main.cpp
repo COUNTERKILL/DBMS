@@ -17,6 +17,7 @@ int main(int argc, char** argv)
 		CDBMS *pDBMS = new CDBMS(&argc, &argv);
 		pDBMS->Initialize();
 		pDBMS->Query(q);
+		pDBMS->Finalize();
 	}
 	catch(string err)
 	{
